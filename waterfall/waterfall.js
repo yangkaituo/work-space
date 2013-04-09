@@ -1,3 +1,4 @@
+// 内部用的一些工具
 var tools = function() {
 	var hash = {
 		0: 'hide',
@@ -8,21 +9,51 @@ var tools = function() {
 	};
 	
 	var pin = $('#loadingPins');
-	return function(i) {
-
-		i == 0 ? pin.hide() : i == 1 ? 
-			pin.css(hash[i]).show() : i == 2 ?
-				pin.html(hash[i][0]).css(hash[i][0]) : i == 3 ?
-					pin.html(hash[i][0]).css(hash[i][1]) : i == 4 ?
-						pin.html(hash[i][0]) : pin.hide();				
+	return {
+		//输出各种异常信息
+		notice: function(i) {
+			i == 0 ? pin.hide() : i == 1 ? 
+				pin.css(hash[i]).show() : i == 2 ?
+					pin.html(hash[i][0]).css(hash[i][0]) : i == 3 ?
+						pin.html(hash[i][0]).css(hash[i][1]) : i == 4 ?
+							pin.html(hash[i][0]) : pin.hide();				
+		},
+		
+		//检查初始化对象是否正常
+		check_object: function(spec) {
+			console.log('asdfas' + spec);
+			var name;
+			for (name in spec) {
+				if (spec[name] == '') {
+					console.log(name);
+					this.notice(4);
+					return true;
+				}
+			}
+			
+		}, 
+	
+		//检查对象是否为空
+		isEmptyObject: function(spec) {
+			console.log('empty ' + spec);
+			var name;
+			for (name in spec) {
+				return false;
+			}
+			this.notice(4);
+			return true;
+		}
 	}
 }();
 
 //init waterfall
 var init_wf = (function(wf) {
 	if(DEBUG && console) console.log(wf);
-		
-	wf = wf || {};
+
+	if (tools.check_object(wf) || tools.isEmptyObject(wf)) {
+		console.log('true');
+		return;
+	}
 		
 	var min_col   = wf.min_col,
 	    img_width = wf.width,
@@ -39,8 +70,7 @@ var init_wf = (function(wf) {
 	
 	if(DEBUG && console) console.log('实际列 ' + wf.cols);
 	if(DEBUG && console) console.log('实际列间距 ' + wf.colspan);
-
-	return wf		
+	
 })(wf_config);
 if(DEBUG && console) console.log(wf_config);
 	
@@ -51,13 +81,12 @@ if(DEBUG && console) console.log(wf_config);
 var get_image_data = function(api) {	
 	if(DEBUG && console) console.log(api);	
 	
-	if(!api){ 
-		tools(4);
+	if(tools.check_object(api) || tools.isEmptyObject(api) || tools.isEmptyObject(wf_config)){ 
 		return
 	} 
 	
 	if (api.page > api.per_page ) {
-		tools(3);
+		tools.notice(3);
 		switch_bind.pause();
 		return
 	}
@@ -94,7 +123,7 @@ var get_image_data = function(api) {
 				success(item);	
 
 		}else{
-			tools(2);
+			tools.notice(2);
 		}
 
 	})	
@@ -119,7 +148,7 @@ var switch_bind = {
 			if (exper_height -  (exper_scroll + window_height) < 20 ) {
 				if(DEBUG && console)console.log("wf page " + api.page);
 
-				tools(1);
+				tools.notice(1);
 				get_image_data(api);
 				self.pause();
 			}			
@@ -135,18 +164,13 @@ var switch_bind = {
 
 function reSize(wf, WaterFall) {		
 		var newWidth =  $(wf.exper).width();
-		//console.log('newWidth: ' + newWidth);
 		var min_width = wf.min_col * wf.width;
-		//console.log('cols width:' + wf.width);
-		//console.log('min width: ' + min_width);
 		
 		if (newWidth > min_width) {
 			wf.cols = Math.floor(newWidth / wf.width);
-			//console.log('new cols:' + wf.cols);
 			wf.colspan = Math.floor((newWidth - wf.cols * wf.width) / (wf.cols - 1));	
 		}
 		
-		//console.log('resize wf:' + wf);
 		
 		WaterFall.reflow(wf);
 }
@@ -159,7 +183,7 @@ var WaterFall = function(wf) {
 			colsHeight[i] = 0;
 		}	
 	})();
-	//if(DEBUG && console) console.log('init array' + colsHeight);
+	if(DEBUG && console) console.log('init array' + colsHeight);
 	
 	var _getShortestColumnNumber = function() {
 		var ret = 0;
@@ -172,14 +196,12 @@ var WaterFall = function(wf) {
 	};
 	
 	var _getTop = function(col) {
-		//console.log('return top :' + this.colsHeight[col]);
 		return colsHeight[col];
 	};
 	
 	var _updateColumnHeight = function(col, height){
 		
 		height += 30;
-		//console.log('update ' + this.colsHeight[col]);
 		colsHeight[col] += height;
 	};
 	
@@ -207,10 +229,8 @@ var WaterFall = function(wf) {
 			var i = 0; //, images_html = '';
 			for (i; i < 20; i++) {
 				var items = data[i];				
-				//console.log(i + ':' + items);	
 				
 				var col = _getShortestColumnNumber();
-				//console.log(col);
 				var top = _getTop(col);
 				var left = _getLeft(col);	
 				var height = items[3] + 42;		
@@ -227,13 +247,11 @@ var WaterFall = function(wf) {
         		              '<img height="'+ img_height +'px" style="height:' + img_height + 
         		              'px" alt="'+ title +'" src="'+ img_src +'">' +
         		              '</a><p class="description">' + title + '</p></div>';	
-        		//console.log(images_html);	
 				_updateColumnHeight(col, height);	
 								
 				$(wf.exper).append(images_html);					
 				$("."+data_id).fadeIn(5000);
 				
-				//console.log('exper height:' + this._getHeightestColumn());
 				$(wf.exper).css({
 					height: _getHeightestColumn()
 				});
@@ -262,7 +280,7 @@ var WaterFall = function(wf) {
 					var left = _getLeft(col);
 					var top = _getTop(col);
 			
-					//console.log('id:'+ i + ' col:' + col + ' left: ' + left + 'top: ' + top + ' height='+height);
+					if (DEBUG && console) console.log('id:'+ i + ' col:' + col + ' left: ' + left + 'top: ' + top + ' height='+height);
 					item.css({
 						left: left,
 						top: top
@@ -289,7 +307,7 @@ function success(item) {
 		console.log('接口异常');
 	}
 	
-	tools(0);
+	tools.notice(0);
 	$('#BackToTop').show();	
 			
 	test.readyImage(item);
