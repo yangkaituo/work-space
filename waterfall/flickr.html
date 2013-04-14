@@ -2,29 +2,75 @@
 <html>
 <head>
 <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
-<script>	
+<script src="waterfall.js"></script>
+<script>
+$(document).ready(function() {	
 	DEBUG = true;   //console.log 的开关
 	
-	//waterfall config
-	var wf_config = {
+	var nextpage = 1;
+	var waterfall = new WaterFall({
 		exper: '#ColumnContainer',    // show data container
+		get_image_data: function(success, end) {
+			
+			//api config
+			var api = {	
+				url: 'http://api.flickr.com/services/rest/',
+				method: 'flickr.photos.search',
+				api_key: '5d93c2e473e39e9307e86d4a01381266',
+				tags: 'rose',
+				per_page: 20,
+				page: nextpage,
+				format: 'json'		
+			};
+			
+			//api url
+			var apiCall = api.url + '?method=' + api.method + '&api_key=' + api.api_key +
+				  '&tags=' + api.tags + '&page=' + api.page +'&per_page=' + api.per_page +
+				  '&format=' + api.format +'&_ksTS=1365144900923_27&jsoncallback=?';	
+				  
+			$.getJSON(apiCall, function(data){
+				if(DEBUG && console) console.log(apiCall);
+
+				var item = {};
+				if (data.stat === "ok") {
+					$.each(data.photos.photo, function(i, photo) {
+						var img_src = 'http://farm' + photo.farm + '.static.flickr.com/' + photo.server + 
+		                      		  '/' + photo.id + '_' + photo.secret + '_' + 'm.jpg';
+		                      
+		        		var a_href = "http://www.flickr.com/photos/" + photo.owner + "/" + photo.id + "/";
+		        		var title  = photo.title;
+		        
+		        		if(DEBUG && console) console.log('img_src ' + img_src);
+		        		if(DEBUG && console) console.log('a_href ' + a_href);
+		        
+		        		var height = Math.round(Math.random()*(300 - 180) + 180);
+		        		if(DEBUG && console) console.log(height);
+		        
+		        		var array = [];
+		        		array.push(img_src, a_href, title, height);
+		        		if(DEBUG && console) console.log(array);
+		        
+		        		item[i] = array;
+		        		if(DEBUG && console) console.log(item);				      
+					})
+				
+					success(item);
+				
+					nextpage = data.photos.page + 1;
+				
+					if (nextpage > api.per_page) {
+						end(true);
+					}
+				}else{
+					end(false);
+				}
+			});		
+		},
 		min_col:'2',     // min columns
 		width: 230,      // every blocked's width 
-		colspan: '10',   // default space between cols
-	};
-	
-	//flicker api config
-	var api = {
-	
-		url: 'http://api.flickr.com/services/rest/',
-		method: 'flickr.photos.search',
-		api_key: '5d93c2e473e39e9307e86d4a01381266',
-		tags: 'rose',
-		per_page: 20,
-		page: 1,
-		format: 'json'
-		
-	};
+		colspan: '10'   // default space between cols
+	});
+});
 
 </script>
 <style>
@@ -48,6 +94,6 @@ body {background-color:#cccccc;}
 			</div>
 		</div>
 	</div>
-<script src="waterfall.js"></script> 
+
 </body>
 </html>
