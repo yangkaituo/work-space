@@ -1,12 +1,77 @@
+	var Tools = function() {
+		var hash = {
+			0: 'hide',
+			1: {bottom:'9px', top:'0px'},
+			2: ["<span>接口异常</span>", {top: '9px'}],
+			3: ["<span>数据加载完成</span>", {bottom:'9px', top:'0px'}],
+			4: ["<span>接口配置不完善</span>", {bottom:'9px', top:'0px'}]
+		};
+	
+		var pin = $('#loadingPins');
+		return function(i) {
+				if(DEBUG && console) console.log('notice ' + i);
+				i == 0 ? pin.hide() : i == 1 ? 
+					pin.css(hash[i]).show() : i == 2 ?
+						pin.html(hash[i][0]).css(hash[i][0]).show() : i == 3 ?
+							pin.html(hash[i][0]).css(hash[i][1]).show() : i == 4 ?
+								pin.html(hash[i][0]).show() : pin.hide();				
+			}
+	};
+	
 var WaterFall = function(api) {
-	console.log(api);
+	var tools = new Tools();
+	var cols, colspan, width,
+	    key = false;
 	
-	// Todo Check up api
+	var check_api_tools = (function(api) {
 	
-	var cols, colspan, width;
+		if (typeof api !== 'object') {
+			if(DEBUG && console) console.log('bug in here!');
+			tools(4);
+			key = true;
+		}
+		
+		if (! api.hasOwnProperty('exper') && api.hasOwnProperty('get_image_data') && 
+			  api.hasOwnProperty('min_col') && api.hasOwnProperty('width') && 
+			  api.hasOwnProperty('colspan')) {
+			  	if(DEBUG && console) console.log('bug in here!');
+				key = true;					  
+		}
+		
+		if ((typeof api.exper !== 'string') || (/^\#/.test(api.exper) === false)) {
+				if(DEBUG && console) console.log('bug in here!');
+				key = true;				
+		}
+		
+		if ( typeof api.get_image_data !== 'function') {
+				if(DEBUG && console) console.log('bug in here!');
+				key = true;
+		}
+		
+		if ( typeof api.min_col !== 'number' || api.min_col == 0 ) {
+				if(DEBUG && console) console.log('bug in here!');
+				key = true;
+		}
+		
+		if ( typeof api.width !== 'number' || api.width == 0 ) {
+				if(DEBUG && console) console.log('bug in here!');
+				key = true;
+		}
+		
+		if ( typeof api.colspan !== 'number' || api.colspan == 0 ) {
+				if(DEBUG && console) console.log('bug in here!');
+				key = true;
+		}
+		
+	}(api));
+	
+	if (key) {
+		tools(4);
+		return;
+	}
+	
 	var init = (function() {
 			width = $(api.exper).width();
-			console.log(width);
 			
 			var min_width = api.min_col * (api.width + 10);
 			if(DEBUG && console) console.log('最小宽度 ' + min_width);
@@ -20,47 +85,20 @@ var WaterFall = function(api) {
 	if(DEBUG && console) console.log('实际列 ' + cols);
 	if(DEBUG && console) console.log('实际列间距 ' + colspan);
 	
-	var tools = function() {
-		var hash = {
-			0: 'hide',
-			1: {bottom:'9px', top:'0px'},
-			2: ["<span>接口异常</span>", {top: '9px'}],
-			3: ["<span>数据加载完成</span>", {bottom:'9px', top:'0px'}],
-			4: ["<span>接口配置不完善</span>", {bottom:'9px', top:'0px'}]
-		};
-	
-		var pin = $('#loadingPins');
-		return {
-			//输出各种异常信息
-			notice: function(i) {
-				console.log('notice ' + i);
-				i == 0 ? pin.hide() : i == 1 ? 
-					pin.css(hash[i]).show() : i == 2 ?
-						pin.html(hash[i][0]).css(hash[i][0]).show() : i == 3 ?
-							pin.html(hash[i][0]).css(hash[i][1]).show() : i == 4 ?
-								pin.html(hash[i][0]).show() : pin.hide();				
-			}
-		}
-	}();	
-
-	function reSize(WaterFall) {
-		console.log(WaterFall);		
+	function reSize(WaterFall) {		
 		var newWidth =  $(api.exper).width();
-		console.log(newWidth);
 		var min_width = api.min_col * api.width;
 		
 		if (newWidth > min_width) {
 			cols = Math.floor(newWidth / api.width);
-			console.log('resize cols ' + cols);
+			if(DEBUG && console) console.log('resize cols ' + cols);
 			colspan = Math.floor((newWidth - cols * api.width) / (cols - 1));
-			console.log('resize colspan ' + colspan);	
-		}
-		
-		
+			if(DEBUG && console) console.log('resize colspan ' + colspan);	
+		}		
 		WaterFall.reflow();
 	}
 	
-	var wf = function() {
+	var WF = function() {
 		var colsHeight = [];
 	
 		var init = (function() {
@@ -154,7 +192,6 @@ var WaterFall = function(api) {
 						colsHeight[i] = 0;
 					}
 		
-					//var This = this;
 					$(api.exper + ' > div').each(function(i, e){
 						var item = $(e);
 			
@@ -198,8 +235,8 @@ var WaterFall = function(api) {
 
 				if (exper_height -  (exper_scroll + window_height) < 20 ) {
 					if(DEBUG && console)console.log("wf page " + api.page);
-					console.log('i am here!');					
-					tools.notice(1);
+				
+					tools(1);
 					api.get_image_data(success, end);
 					self.pause();			
 				}
@@ -212,35 +249,35 @@ var WaterFall = function(api) {
 
 	};
 	
-	var test = new wf();
+	var waterfall = new WF();
 
 	var end = function(o) {
-		console.log('i am ending');
+		if(DEBUG && console) console.log('i am ending');
 		
 		if(o) {
-			tools.notice(3); 
+			tools(3); 
 		}else{
-			tools.notice(4);
+			tools(4);
 		}
 		switch_bind.pause(); 
 	};
 			
 	var success = function(item) {
-		console.log(item);
+
 		if (!item) {
-			tools.notice(2); 
+			tools(2); 
 		}
 	
-		tools.notice(0); 
+		tools(0); 
 		$('#BackToTop').show();	
 			
-		test.readyImage(item);
+		waterfall.readyImage(item);
 		switch_bind.start(); 
 	};
 	
 	api.get_image_data(success, end);
 	
-	$(window).resize(function (){reSize(test)});
+	$(window).resize(function (){reSize(waterfall)});
 	
 	$('#BackToTop').bind('click', function() {
 		$('#BackToTop').scrollTop(0);
