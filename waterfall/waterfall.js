@@ -10,7 +10,6 @@
 	
 		var pin = $('#loadingPins');
 		return function(i) {
-				if(DEBUG && console) console.log('notice ' + i);
 				i == 0 ? pin.hide() : i == 1 ? 
 					pin.css(hash[i]).show() : i == 2 ?
 						pin.html(hash[i][0]).css(hash[i][0]).show() : i == 3 ?
@@ -21,40 +20,40 @@
 	
 var waterfall = function(api, This) {
 	var tools = new Tools();
-	var cols, colspan, width,
+	var cols, colspan, width, settings,
 	    key = false;
 	
-	var check_api_tools = (function(api) {
+	var checkApiTools = (function(api) {
 	
 		if (typeof api !== 'object') {
-			if(DEBUG && console) console.log('bug in here!');
+			if(api.debug && console) console.log('bug in here!');
 			tools(4);
 			key = true;
 		}
 		
-		if (! api.hasOwnProperty('get_image_data') && api.hasOwnProperty('min_col') && 
+		if (! api.hasOwnProperty('getImageData') && api.hasOwnProperty('col') && 
 			  api.hasOwnProperty('width') && api.hasOwnProperty('colspan')) {
-			  	if(DEBUG && console) console.log('bug in here!');
+			  	if(api.debug && console) console.log('bug in here!');
 				key = true;					  
 		}
 		
-		if ( typeof api.get_image_data !== 'function') {
-				if(DEBUG && console) console.log('bug in here!');
+		if ( typeof api.getImageData !== 'function') {
+				if(api.debug && console) console.log('bug in here!');
 				key = true;
 		}
 		
-		if ( typeof api.min_col !== 'number' || api.min_col == 0 ) {
-				if(DEBUG && console) console.log('bug in here!');
+		if ( typeof api.col !== 'number' || api.col == 0 ) {
+				if(api.debug && console) console.log('bug in here!');
 				key = true;
 		}
 		
 		if ( typeof api.width !== 'number' || api.width == 0 ) {
-				if(DEBUG && console) console.log('bug in here!');
+				if(api.debug && console) console.log('bug in here!');
 				key = true;
 		}
 		
 		if ( typeof api.colspan !== 'number' || api.colspan == 0 ) {
-				if(DEBUG && console) console.log('bug in here!');
+				if(api.debug && console) console.log('bug in here!');
 				key = true;
 		}
 		
@@ -65,31 +64,45 @@ var waterfall = function(api, This) {
 		return;
 	}
 	
-	var init = (function() {
-			width = This.width();
-			if(DEBUG && console) console.log('width' + width);
-			var min_width = api.min_col * (api.width + 10);
-			if(DEBUG && console) console.log('最小宽度 ' + min_width);
+	settings = $.extend({
+		cols: 2,
+		colspan: 10,
+		width: 230,
+		debug: false
+	}, api);
 	
-			if (width > min_width) {
-				cols = Math.floor(width/api.width);		
-				colspan = Math.floor((width - cols * api.width) / (cols - 1));		
+	var init = (function(o) {
+			width = This.width();
+			if(o.debug && console) console.log('width' + width);
+			o.min_width = o.col * (o.width + 10);
+			if(o.debug && console) console.log('最小宽度 ' + o.min_width);
+	
+			if (width > o.min_width) {
+				o.cols = Math.floor(width/o.width);		
+				o.colspan = Math.floor((width - o.cols * o.width) / (o.cols - 1));		
 			}
-
-	}());	
-	if(DEBUG && console) console.log('实际列 ' + cols);
-	if(DEBUG && console) console.log('实际列间距 ' + colspan);
+			
+			return o;
+	}(settings));	
+	
+	if(settings.debug && console) console.dir(settings);
+	if(settings.debug && console) console.log('实际列 ' + settings.cols);
+	if(settings.debug && console) console.log('实际列间距 ' + settings.colspan);
 	
 	function reSize(WaterFall) {		
 		var newWidth =  This.width();
-		var min_width = api.min_col * api.width;
+		if(settings.debug && console) console.log('new width ' + newWidth);
 		
-		if (newWidth > min_width) {
-			cols = Math.floor(newWidth / api.width);
-			if(DEBUG && console) console.log('resize cols ' + cols);
-			colspan = Math.floor((newWidth - cols * api.width) / (cols - 1));
-			if(DEBUG && console) console.log('resize colspan ' + colspan);	
-		}		
+		var o = {};
+		if (newWidth > settings.min_width) {			
+			o.cols = Math.floor(newWidth / settings.width);			
+			o.colspan = Math.floor((newWidth - settings.cols * settings.width) / (settings.cols - 1));
+		}
+			
+		if(settings.debug && console) console.log(o);
+		settings = $.extend(settings, o);
+		if(settings.debug && console) console.dir(settings);	
+		
 		WaterFall.reflow();
 	}
 	
@@ -97,15 +110,15 @@ var waterfall = function(api, This) {
 		var colsHeight = [];
 	
 		var init = (function() {
-			for(var i = 0; i < cols; i++) {
+			for(var i = 0; i < settings.cols; i++) {
 				colsHeight[i] = 0;
 			}	
 		})();
-		if(DEBUG && console) console.log('init array' + colsHeight);
+		if(settings.debug && console) console.log('init array' + colsHeight);
 	
 		var _getShortestColumnNumber = function() {
 			var ret = 0;
-			for (var i = 0; i < cols; i++) {
+			for (var i = 0; i < settings.cols; i++) {
 				if (colsHeight[i] < colsHeight[ret]) {
 					ret = i;
 				}
@@ -124,12 +137,12 @@ var waterfall = function(api, This) {
 		};
 	
 		var _getLeft = function(col) {
-			return col * (api.width + colspan);
+			return col * (settings.width + settings.colspan);
 		};
 	
 		var _getHeightestColumn = function() {
 			var max = 0;
-			for (var i = 0; i < cols; i++) {
+			for (var i = 0; i < settings.cols; i++) {
 				if (colsHeight[i] > max) {
 					max = colsHeight[i];
 				}
@@ -143,44 +156,35 @@ var waterfall = function(api, This) {
 					return;
 				}
 				
-				for (var i in data) {
-					var items = data[i];									
-					
-					var col = _getShortestColumnNumber();
-					var top = _getTop(col);
-					var left = _getLeft(col);
-					var height = items[3] + 42;		
-					var img_height = items[3];
-					var href = items[1];
-					var title = items[2];
-					var img_src = items[0] 
-					var data_col = 'data_col_' + col;
-					var data_id = 'data_' + top + left;
-	        		
-        			var images_html = '<div class="pin '+ data_col +' '+ data_id +'" style="'+
-        			               'top:'+ top +'px;left:'+ left + 'px; height:'+ height +'px">' + 	
-								  '<a href="' + href + '" class="image">' +
-        		    	          '<img height="'+ img_height +'px" style="height:' + img_height + 
-        		        	      'px" alt="'+ title +'" src="'+ img_src +'">' +
-        		            	  '</a><p class="description">' + title + '</p></div>';	
+				$.each(data, function(i, item) {
+														
+					item.col      = _getShortestColumnNumber();
+					item.top      = _getTop(item.col);
+					item.left     = _getLeft(item.col);
+					item.height   = item.img_height + 42;
+					item.data_col = 'data_col_' + item.col;
+					item.data_id  = 'data_' + item.top + item.left;
+        		            	  
+        		    var html = api.renderItemHtml(item);
         		    
-					_updateColumnHeight(col, height);	
+					_updateColumnHeight(item.col, item.height);	
 								
-					This.append(images_html);					
-					$("."+data_id).fadeIn(5000);
+					This.append(html);					
+					$("." + item.data_id).fadeIn(5000);
 				
 					This.css({
 						height: _getHeightestColumn()
 					});
 								
-				}
+				});
+
 			
 			},
 			reflow: function() {
-					var newCols = cols;
-					var newColspan = colspan;
+					var newCols = settings.cols;
+					var newColspan = settings.colspan;
 		
-			        if (DEBUG && console) console.log('new colspan: ' + newColspan);
+			        if (settings.debug && console) console.log('new colspan: ' + newColspan);
 		        
 					for(var i = 0; i < newCols; i++) {
 						colsHeight[i] = 0;
@@ -192,20 +196,22 @@ var waterfall = function(api, This) {
 						var height = item.css('height');
 							height = height.replace('px', '');
 							height = parseInt(height);
+							
 						var col = _getShortestColumnNumber();
 						var left = _getLeft(col);
 						var top = _getTop(col);
 			
-						if (DEBUG && console) console.log('id:'+ i + ' col:' + col + ' left: ' + left + 'top: ' + top + ' height='+height);
+						if (settings.debug && console) console.log('id:'+ i + ' col:' + col + ' left: ' + left + 'top: ' + top + ' height='+height);
 						item.css({
 							left: left,
 							top: top
 						});
+						
 						_updateColumnHeight(col, height);	
 			
 					});
 		
-					$(api.exper).css({
+					This.css({
 						height: _getHeightestColumn()
 					});
 	   
@@ -219,19 +225,19 @@ var waterfall = function(api, This) {
 			var self = this;
 			$(window).bind("scroll", function(){
 				var exper_scroll = $(window).scrollTop();
-				if(DEBUG && console) console.log('scroll top:' + exper_scroll);
+				if(settings.debug && console) console.log('scroll top:' + exper_scroll);
 
 				var exper_height = This.height();
-				if(DEBUG && console) console.log('exper height:' + exper_height);
+				if(settings.debug && console) console.log('exper height:' + exper_height);
 	
 				var window_height = $(window).height();
-				if(DEBUG && console) console.log('window height:' + window_height);
+				if(settings.debug && console) console.log('window height:' + window_height);
 
 				if (exper_height -  (exper_scroll + window_height) < 20 ) {
-					if(DEBUG && console)console.log("i am here ");
+					if(settings.debug && console) console.log("i am here ");
 				
 					tools(1);
-					api.get_image_data(success, end);
+					settings.getImageData(callback);
 					self.pause();			
 				}
 			});
@@ -246,7 +252,7 @@ var waterfall = function(api, This) {
 	var wf = new WF();
 
 	var end = function(o) {
-		if(DEBUG && console) console.log('i am ending');
+		if(settings.debug && console) console.log('i am ending');
 		
 		if(o) {
 			tools(3); 
@@ -256,20 +262,25 @@ var waterfall = function(api, This) {
 		switch_bind.pause(); 
 	};
 			
-	var success = function(item) {
+	var callback = function(items, hasNextPage) {
+	
+		if (! hasNextPage) {
+			end();
+		}
 
-		if (!item) {
+		if (!items) {
 			tools(2); 
+			end();
 		}
 	
 		tools(0); 
 		$('#BackToTop').show();	
 			
-		wf.readyImage(item);
+		wf.readyImage(items);
 		switch_bind.start(); 
 	};
 	
-	api.get_image_data(success, end);
+	settings.getImageData(callback);
 	
 	$(window).resize(function (){reSize(wf)});
 	
@@ -284,7 +295,7 @@ $.WaterFall = function(option, This) {
 }
 
 $.fn.WaterFall = function(option) {
-	$.WaterFall(option, $(this));
+	$.WaterFall(option, this);
 //	new waterfall(option, $(this));
 }
 }(jQuery));

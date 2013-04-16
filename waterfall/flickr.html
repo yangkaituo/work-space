@@ -6,13 +6,14 @@
 <script src="waterfall.js"></script>
 <script>
 $(document).ready(function() {
-	DEBUG = false;   //console.log 的开关
 	var nextpage = 1;
+	var debug = false;
 	$('#ColumnContainer').WaterFall({
-		min_col: 2,      // min columns
+		debug: debug,    //console.log 的开关
+		col: 2,      // min columns
 		width: 230,      // every blocked's width 
 		colspan: 10,      // default space between cols
-		get_image_data: function(success, end) {
+		getImageData: function(callback) {
 			//api config
 			var api = {	
 				url: 'http://api.flickr.com/services/rest/',
@@ -30,9 +31,9 @@ $(document).ready(function() {
 				  '&format=' + api.format +'&_ksTS=1365144900923_27&jsoncallback=?';	
 				  
 			$.getJSON(apiCall, function(data){
-				if(DEBUG && console) console.log(apiCall);
+				if(debug && console) console.log(apiCall);
 
-				var item = {};
+				var items = [];
 				if (data.stat === "ok") {
 					$.each(data.photos.photo, function(i, photo) {
 						var img_src = 'http://farm' + photo.farm + '.static.flickr.com/' + photo.server + 
@@ -41,31 +42,47 @@ $(document).ready(function() {
 		        		var a_href = "http://www.flickr.com/photos/" + photo.owner + "/" + photo.id + "/";
 		        		var title  = photo.title;
 		        
-		        		if(DEBUG && console) console.log('img_src ' + img_src);
-		        		if(DEBUG && console) console.log('a_href ' + a_href);
+		        		if(debug && console) console.log('img_src ' + img_src);
+		        		if(debug && console) console.log('a_href ' + a_href);
 		        
 		        		var height = Math.round(Math.random()*(300 - 180) + 180);
-		        		if(DEBUG && console) console.log(height);
+		        		if(debug && console) console.log(height);
 		        
-		        		var array = [];
-		        		array.push(img_src, a_href, title, height);
-		        		if(DEBUG && console) console.log(array);
+		        		var item = {
+		        			'img_src' : img_src,
+		        			'a_href'  : a_href,
+		        			'title'   : title,
+		        			'img_height'  : height
+		        		};
 		        
-		        		item[i] = array;
-		        		if(DEBUG && console) console.log(item);				      
+		        		items.push(item);
+		        		if(debug && console) console.log(items);				      
 					})
-				
-					success(item);
+					
+					var hasNextPage = true;
+					
+					if (nextpage > api.per_page) {
+				    	hasNextPage = false;
+				    }
+				    
+					callback(items, hasNextPage);
 				
 					nextpage = data.photos.page + 1;
-				
-					if (nextpage > api.per_page) {
-						end(true);
-					}
+
 				}else{
-					end(false);
+					callback(items, hasNextPage);
 				}
 			});		
+		},
+		
+		renderItemHtml: function(item) {
+			var html = '<div class="pin '+ item.data_col +' '+ item.data_id +'" style="'+
+        			'top:'+ item.top +'px;left:'+ item.left + 'px; height:'+ item.height +'px">' + 	
+					'<a href="' + item.a_href + '" class="image">' +
+        		    '<img height="'+ item.img_height +'px" style="height:' + item.img_height + 
+        		    'px" alt="'+ item.title +'" src="'+ item.img_src +'">' +
+        		    '</a><p class="description">' + item.title + '</p></div>';	
+			return html;
 		}
 	});	
 });
