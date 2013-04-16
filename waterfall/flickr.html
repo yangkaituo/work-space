@@ -5,14 +5,14 @@
 <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
 <script src="waterfall.js"></script>
 <script>
-$(document).ready(function() {	
-	DEBUG = true;   //console.log 的开关
-	
+$(document).ready(function() {
+	DEBUG = false;   //console.log 的开关
 	var nextpage = 1;
-	var waterfall = new WaterFall({
-		exper: '#ColumnContainer',    // show data container
+	$('#ColumnContainer').WaterFall({
+		min_col: 2,      // min columns
+		width: 230,      // every blocked's width 
+		colspan: 10,      // default space between cols
 		get_image_data: function(success, end) {
-			
 			//api config
 			var api = {	
 				url: 'http://api.flickr.com/services/rest/',
@@ -66,13 +66,11 @@ $(document).ready(function() {
 					end(false);
 				}
 			});		
-		},
-		min_col: 2,      // min columns
-		width: 230,      // every blocked's width 
-		colspan: 10      // default space between cols
-	});
+		}
+	});	
 });
-
+//console.dir($);
+//console.dir($('#ColumnContainer'));
 </script>
 <style>
 body {background-color:#cccccc;}
