@@ -1,33 +1,27 @@
 (function($) {
-	var Tools = function() {
+	var Tools = function(pin, debug) {
 		var hash = {
-			0: 'hide',
-			1: {bottom:'9px', top:'0px'},
-			2: ["<span>接口异常</span>", {top: '9px'}],
-			3: ["<span>数据加载完成</span>", {bottom:'9px', top:'0px'}],
-			4: ["<span>接口配置不完善</span>", {bottom:'9px', top:'0px'}]
+			0: '',
+			1: '',
+			2: "<span>接口异常</span>",
+			3: "<span>数据加载完成</span>",
+			4: "<span>配置不完善</span>"
 		};
-	
-		var pin = $('#loadingPins');
+
 		return function(i) {
-				i == 0 ? pin.hide() : i == 1 ? 
-					pin.css(hash[i]).show() : i == 2 ?
-						pin.html(hash[i][0]).css(hash[i][0]).show() : i == 3 ?
-							pin.html(hash[i][0]).css(hash[i][1]).show() : i == 4 ?
-								pin.html(hash[i][0]).show() : pin.hide();				
+		if(debug && console) console.log(i);
+				i == 1 ? $(pin).removeClass('top').addClass("bottom").show() : i == 2 ?
+					$(pin).html(hash[i]) : i == 3 ?
+						$(pin).html(hash[i]).show() : i == 4 ?
+							$(pin).html(hash[i]).show() : pin.hide();				
 			}
 	};
 	
-var waterfall = function(api, This) {
-	var tools = new Tools();
-	var cols, colspan, width, settings,
-	    key = false;
-	
-	var checkApiTools = (function(api) {
-	
+	var checkApiTools = function(api) {
+		var key = false;
+
 		if (typeof api !== 'object') {
 			if(api.debug && console) console.log('bug in here!');
-			tools(4);
 			key = true;
 		}
 		
@@ -57,20 +51,31 @@ var waterfall = function(api, This) {
 				key = true;
 		}
 		
-	}(api));
-	
-	if (key) {
-		tools(4);
-		return;
+		if ( typeof api.backtotop !== 'string' || (! /^\#/.test(api.backtotop))) {
+				if(api.debug && console) console.log('bug in here!');
+				key = true
+		}
+		
+		if ( typeof api.notice !== 'string' || (! /^\#/.test(api.notice))) {
+				if(api.debug && console) console.log('bug in here!');
+				key = true
+		}
+		
+		return key;
 	}
+	
+var waterfall = function(api, This, tools) {
+	var cols, colspan, width, settings;
 	
 	settings = $.extend({
 		cols: 2,
 		colspan: 10,
 		width: 230,
-		debug: false
+		debug: false,
+		backtotop: '#BackToTop',
+		notice: '#loadingPins',
 	}, api);
-	
+		
 	var init = (function(o) {
 			width = This.width();
 			if(o.debug && console) console.log('width' + width);
@@ -82,6 +87,7 @@ var waterfall = function(api, This) {
 				o.colspan = Math.floor((width - o.cols * o.width) / (o.cols - 1));		
 			}
 			
+			$(o.notice).show();
 			return o;
 	}(settings));	
 	
@@ -147,7 +153,7 @@ var waterfall = function(api, This) {
 					max = colsHeight[i];
 				}
 			}
-			return max;
+			return max + 46;
 		};
 		
 		return {
@@ -163,22 +169,19 @@ var waterfall = function(api, This) {
 					item.left     = _getLeft(item.col);
 					item.height   = item.img_height + 42;
 					item.data_col = 'data_col_' + item.col;
-					item.data_id  = 'data_' + item.top + item.left;
-        		            	  
-        		    var html = api.renderItemHtml(item);
+					item.data_id  = 'data_' + item.top + item.left;        		    
         		    
 					_updateColumnHeight(item.col, item.height);	
-								
-					This.append(html);					
-					$("." + item.data_id).fadeIn(5000);
 				
 					This.css({
 						height: _getHeightestColumn()
 					});
 								
 				});
+				
+				var html = api.renderItemHtml(data);
 
-			
+				This.append(html);					
 			},
 			reflow: function() {
 					var newCols = settings.cols;
@@ -248,33 +251,31 @@ var waterfall = function(api, This) {
 		}
 
 	};
-	
-	var wf = new WF();
 
-	var end = function(o) {
-		if(settings.debug && console) console.log('i am ending');
-		
-		if(o) {
-			tools(3); 
-		}else{
-			tools(4);
-		}
-		switch_bind.pause(); 
-	};
+	var wf = new WF();
 			
 	var callback = function(items, hasNextPage) {
 	
+		this.end = function() {
+			if(settings.debug && console) console.log('i am ending');
+
+			switch_bind.pause(); 
+		};
+	
 		if (! hasNextPage) {
-			end();
+			tools(3); 
+			this.end();
+			return;
 		}
 
 		if (!items) {
 			tools(2); 
-			end();
+			this.end();
+			return
 		}
 	
-		tools(0); 
-		$('#BackToTop').show();	
+		$(settings.notice).hide(); 
+		$(settings.backtotop).show();	
 			
 		wf.readyImage(items);
 		switch_bind.start(); 
@@ -284,18 +285,25 @@ var waterfall = function(api, This) {
 	
 	$(window).resize(function (){reSize(wf)});
 	
-	$('#BackToTop').bind('click', function() {
-		$('#BackToTop').scrollTop(0);
+	$(settings.backtotop).bind('click', function() {
+		$(settings.backtotop).scrollTop(0);
 	});
 };
 
-$.WaterFall = function(option, This) {
-	$.data(This, 'WaterFall', new waterfall(option, This));
+$.WaterFall = function(option, This, tools) {
+	$.data(This, 'WaterFall', new waterfall(option, This, tools));
 	return This;
 }
 
 $.fn.WaterFall = function(option) {
-	$.WaterFall(option, this);
-//	new waterfall(option, $(this));
+	
+	var key = checkApiTools(option);
+	var tools = new Tools(option.notice, option.debug);
+	
+	if (key) {
+		tools(4);
+		return;
+	}
+	$.WaterFall(option, this, tools);
 }
 }(jQuery));

@@ -13,6 +13,8 @@ $(document).ready(function() {
 		col: 2,      // min columns
 		width: 230,      // every blocked's width 
 		colspan: 10,      // default space between cols
+		backtotop: '#BackToTop',    //backToTop's id 
+		notice: '#loadingPins',      // notice
 		getImageData: function(callback) {
 			//api config
 			var api = {	
@@ -33,7 +35,8 @@ $(document).ready(function() {
 			$.getJSON(apiCall, function(data){
 				if(debug && console) console.log(apiCall);
 
-				var items = [];
+				var items = [], 
+				    hasNextPage = true;
 				if (data.stat === "ok") {
 					$.each(data.photos.photo, function(i, photo) {
 						var img_src = 'http://farm' + photo.farm + '.static.flickr.com/' + photo.server + 
@@ -59,7 +62,7 @@ $(document).ready(function() {
 		        		if(debug && console) console.log(items);				      
 					})
 					
-					var hasNextPage = true;
+					
 					
 					if (nextpage > api.per_page) {
 				    	hasNextPage = false;
@@ -70,18 +73,23 @@ $(document).ready(function() {
 					nextpage = data.photos.page + 1;
 
 				}else{
+				
 					callback(items, hasNextPage);
 				}
 			});		
 		},
 		
-		renderItemHtml: function(item) {
-			var html = '<div class="pin '+ item.data_col +' '+ item.data_id +'" style="'+
-        			'top:'+ item.top +'px;left:'+ item.left + 'px; height:'+ item.height +'px">' + 	
-					'<a href="' + item.a_href + '" class="image">' +
-        		    '<img height="'+ item.img_height +'px" style="height:' + item.img_height + 
-        		    'px" alt="'+ item.title +'" src="'+ item.img_src +'">' +
-        		    '</a><p class="description">' + item.title + '</p></div>';	
+		renderItemHtml: function(data) {
+			var html = '';
+			$.each(data, function(i, item) {
+						
+				html += '<div class="pin '+ item.data_col +' '+ item.data_id +'" style="'+
+        				'top:'+ item.top +'px;left:'+ item.left + 'px; height:'+ item.height +'px">' + 	
+						'<a href="' + item.a_href + '" class="image">' +
+        		    	'<img height="'+ item.img_height +'px" style="height:' + item.img_height + 
+        		    	'px" alt="'+ item.title +'" src="'+ item.img_src +'">' +
+        		    	'</a><p class="description">' + item.title + '</p></div>';	
+        	});
 			return html;
 		}
 	});	
@@ -91,11 +99,15 @@ $(document).ready(function() {
 </script>
 <style>
 body {background-color:#cccccc;}
-#loadingPins {padding:15px 0; text-align:center; position:fiexed; top:9px;}
+#loadingPins {padding:15px 0; text-align:center; position:fixed; display:none; width:100%}
 .pin {width:190px; padding:10px; display:inline; float:left; background-color:#ffffff; position:absolute; margin: 10px;}
 .image {position:relative; display:block; width:190px; overflow:hidden;}
 .pin p {margin:10px 0px 0px 0px; height:32px; overflow:hidden; padding:0px;}
 #BackToTop {position:fixed; right:9px; bottom:9px; text-align:center; text-transform:uppercase; color:#41545F; background-color:white; width:50px; padding:10px; opacity:0.9;}
+.top {top: 9px;}
+.bottom {bottom: 20px;}
+.show{display: block;}
+.hidden{display:none;}
 </style>
 </head>
 <body>
@@ -104,7 +116,7 @@ body {background-color:#cccccc;}
 		<div id="article">
 			<div id="ColumnContainer" ></div>
 			<a id="BackToTop" href="#" style="display:none;">Scorll to Top</a>
-			<div id="loadingPins">
+			<div id="loadingPins" class="top">
 				<img src="http://img03.taobaocdn.com/tps/i3/T1Ar9xXg0JXXXXXXXX-16-16.gif" alt="Pin Loader Image">
 				<span>正在加载</span>
 			</div>
