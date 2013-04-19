@@ -1,4 +1,21 @@
+/**
+ * @name jQuery waterfall plugin
+ * @version 1.0.1
+ * @create 2013.4.16
+ * @lastmodified 2013.4.19
+ * @description Based on jQuery 1.4+
+ * @author Kaito  (yangkaituo@gmail.com)
+ */
 (function($) {
+
+/**
+ * @constructor  内部工具，用来配置显示状态信息、错误信息
+ * @param        pin:需要显示内容的指定id 
+ * @param        debug:需要传入接口的debug配置
+ * @private      hash对象 是根据i来配置相应的显示内容，没有则表示默认(数据加载中)
+ * @return       function
+ * @param        根据相应的数字来显示相应的状态
+ */
 	var Tools = function(pin, debug) {
 		var hash = {
 			0: '',
@@ -16,7 +33,11 @@
 							$(pin).html(hash[i]).show() : pin.hide();				
 			}
 	};
-	
+/**
+ * function   检查传入的option接口是否可用
+ * @param     提供的option接口
+ * @return    返回一个布尔值 如果为true 表示有错误，程序停止执行。
+ */	
 	var checkApiTools = function(api) {
 		var key = false;
 
@@ -64,9 +85,19 @@
 		return key;
 	}
 	
+/**
+ * @class  waterfall
+ * @constructor 
+ * @param     提供的option接口
+ * @param     需要加载waterfall数据的id的jQuery实例
+ * @param     new Tools的实例
+ */	
 var waterfall = function(api, This, tools) {
 	var cols, colspan, width, settings;
 	
+	// 设置接口的默认配置
+	// 与传入的option合并
+	// @return 一个object
 	settings = $.extend({
 		cols: 2,
 		colspan: 10,
@@ -75,13 +106,16 @@ var waterfall = function(api, This, tools) {
 		backtotop: '#BackToTop',
 		notice: '#loadingPins',
 	}, api);
-		
+	
+	// 窗体宽度并处初始化列数(cols), 计算列间距(colspan)
+	// @return 一个新的被重新计算过的option object	
 	var init = (function(o) {
 			width = This.width();
 			if(o.debug && console) console.log('width' + width);
 			o.min_width = o.col * (o.width + 10);
 			if(o.debug && console) console.log('最小宽度 ' + o.min_width);
-	
+	        
+	        // 当窗体宽度小于最小宽度则用最小宽度，colspan则用默认值，反之则重新计算
 			if (width > o.min_width) {
 				o.cols = Math.floor(width/o.width);		
 				o.colspan = Math.floor((width - o.cols * o.width) / (o.cols - 1));		
@@ -95,6 +129,9 @@ var waterfall = function(api, This, tools) {
 	if(settings.debug && console) console.log('实际列 ' + settings.cols);
 	if(settings.debug && console) console.log('实际列间距 ' + settings.colspan);
 	
+	//当窗体的宽度被改变时调用这个函数，并重新计算列数(cols)和列间距(colspan) 
+	//并且调用WF的reflow方法，进行重绘
+	//@param  WF的实例
 	function reSize(WaterFall) {		
 		var newWidth =  This.width();
 		if(settings.debug && console) console.log('new width ' + newWidth);
@@ -112,9 +149,22 @@ var waterfall = function(api, This, tools) {
 		WaterFall.reflow();
 	}
 	
+	/**
+	 * @class  waterfall
+	 * @constructor
+	 * @private   name: _getShortestColumnNumber  function  找到存放top值最小的一项
+	 * @private   name: _getTop  function 取div的top值  @param 列项
+	 * @private   name: _updateColumnHeight  function  更新array中相应项的top值
+	 *            @param  列项和高度
+	 * @private   name: _getLeft   function  取div的left值  @param 列项
+	 * @private   name: _getHeightestColumn  function 找到存放top值最大的一项
+	 * @return    name: readyImage  method   @param 需要加工的数据
+	 * @return    name: reflow  method   重绘
+	 */
 	var WF = function() {
-		var colsHeight = [];
+		var colsHeight = [];     // 用来存放每一列top值的数组
 	
+	    //根据列数初始化数组 default 0    
 		var init = (function() {
 			for(var i = 0; i < settings.cols; i++) {
 				colsHeight[i] = 0;
@@ -136,8 +186,7 @@ var waterfall = function(api, This, tools) {
 			return colsHeight[col];
 		};
 	
-		var _updateColumnHeight = function(col, height){
-		
+		var _updateColumnHeight = function(col, height){		
 			height += 30;
 			colsHeight[col] += height;
 		};
@@ -179,7 +228,7 @@ var waterfall = function(api, This, tools) {
 								
 				});
 				
-				var html = api.renderItemHtml(data);
+				var html = settings.renderItemHtml(data);
 
 				This.append(html);					
 			},
@@ -223,6 +272,12 @@ var waterfall = function(api, This, tools) {
 		};	
 	};
 	
+	/**
+	 * object
+	 * @return  start method 绑定scroll事件 
+	 *          Dynamic load waterfall items by monitor window scroll.
+	 * @return  pause method 解除绑定
+	 */
 	var switch_bind = {
 		start: function() {			
 			var self = this;
@@ -253,12 +308,17 @@ var waterfall = function(api, This, tools) {
 	};
 
 	var wf = new WF();
-			
+	
+	/**
+	 * 当getJson 成功的获取数据后调用callback function
+	 * @param    取得的数据 array
+	 * @param    是否还有下一页  布尔值
+	 * @method   end方法
+	 */		
 	var callback = function(items, hasNextPage) {
 	
 		this.end = function() {
 			if(settings.debug && console) console.log('i am ending');
-
 			switch_bind.pause(); 
 		};
 	
@@ -273,30 +333,45 @@ var waterfall = function(api, This, tools) {
 			this.end();
 			return
 		}
-	
+	    
+	    // 数据检查成功后隐藏
 		$(settings.notice).hide(); 
+		// back to top 显示
 		$(settings.backtotop).show();	
-			
+		
+		// 调用加载数据方法	
 		wf.readyImage(items);
+		// 绑定scroll方法
 		switch_bind.start(); 
 	};
 	
+	// 调用方法取得下一批数据
 	settings.getImageData(callback);
 	
+	// 对窗口宽度监听
 	$(window).resize(function (){reSize(wf)});
 	
+	// 为back to top绑定方法
 	$(settings.backtotop).bind('click', function() {
 		$(settings.backtotop).scrollTop(0);
 	});
 };
 
+/**
+ * 绑定waterfall在$
+ * @param 提供option接口  
+ * @param 需要加载waterfall数据的id的jQuery实例
+ * @param new Tools的实例
+*/
 $.WaterFall = function(option, This, tools) {
 	$.data(This, 'WaterFall', new waterfall(option, This, tools));
 	return This;
 }
 
-$.fn.WaterFall = function(option) {
-	
+/**
+ * 在$.prototype上绑定waterfall
+ */
+$.fn.WaterFall = function(option) {	
 	var key = checkApiTools(option);
 	var tools = new Tools(option.notice, option.debug);
 	
