@@ -86,7 +86,7 @@
 	}
 	
 /**
- * @class  waterfall
+ * waterfall
  * @constructor 
  * @param     提供的option接口
  * @param     需要加载waterfall数据的id的jQuery实例
@@ -104,7 +104,7 @@ var waterfall = function(api, This, tools) {
 		width: 230,
 		debug: false,
 		backtotop: '#BackToTop',
-		notice: '#loadingPins',
+		notice: '#loadingPins'
 	}, api);
 	
 	// 窗体宽度并处初始化列数(cols), 计算列间距(colspan)
@@ -150,7 +150,6 @@ var waterfall = function(api, This, tools) {
 	}
 	
 	/**
-	 * @class  waterfall
 	 * @constructor
 	 * @private   name: _getShortestColumnNumber  function  找到存放top值最小的一项
 	 * @private   name: _getTop  function 取div的top值  @param 列项
