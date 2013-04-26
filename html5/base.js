@@ -83,16 +83,20 @@ function Base(obj) {
 				return Math.floor(axis <= 0 ? 0 : axis);
 			}
 		
-		}
+		},
+		
+		window_height: baseObj.window_height,
+		
+		window_width:  baseObj.window_width
 	}
 }
 
 /**
  * class
  */
-function Dispather() {
+function Dispather(mousewheel, window_height) {
 	var array = [];
-	console.log(typeof this.array);
+
 	var init = (function() {
 		$.each($('hgroup '), function(i, e){
 			if (i > 0 ) {
@@ -108,35 +112,59 @@ function Dispather() {
 		});
 
 	})();
+	
+	this.scroll = mousewheel;
+	this.window_height = window_height;
+	this.pause = function() {
+		$(window).unbind(this.scroll);
+	}
 	this.array = array;
 }
 
 Dispather.prototype.notify = function(y) {
 	//console.dir(this.array);
 	//console.log(y);
-	
+	var that = this;
 	$.each(this.array, function(i, e) {
 		var element = $('#' + e.id);
 		//console.log(e);
 				
 		if (y >= e.show && y <= e.hide) {
-			console.log(1);
+			//console.log(1);
 			if (element.css('display') == 'none') {
-				console.log('open' + e.id + y);
+				//console.log('open' + e.id + y);
 				element.show();							
 			}
 			//console.log(e.show);
-			element.scrollTop(e.show);
+			var translatedY = y - e.show;
+			that.scrollBar.call(that, translatedY, e.height, element);
+			
 						
-			var translatedY = y / e.show;
-			e.callback.apply(transltedY;)
+			
+			//if (translatedY > 0) {
+			//	console.log('i am here!');
+				//this.pause();
+			//}
+			//e.callback.apply(transltedY;)
 					
 		} else if (y > e.hide || y < e.show) {
-			console.log(2);
+			//console.log(2);
 			if (element.css('display') != 'none') {
-				console.log('close' + e.id + y);
+				//console.log('close' + e.id + y);
 				element.hide();							
 			}
 		}
 	});
+}
+
+Dispather.prototype.scrollBar = function(y, main_height, element) { 
+	var that = this;
+
+	var move = Math.floor(y / main_height * this.window_height);
+	//console.log(y + ' ' + main_height + ' ' + this.window_height);
+	console.log(move);
+	//return move;
+
+	$('#scroll_bar').fadeIn().css({top: move});
+	element.scrollTop(move);
 }

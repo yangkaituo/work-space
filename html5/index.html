@@ -21,7 +21,7 @@
 				var mousewheel = option.isFirefox() ? "DOMMouseScroll" : "mousewheel";
 				
 				var speedToAxis = new option.SpeedToAxis({max: 20, min: 2});
-				var dispather = new Dispather();
+				var dispather = new Dispather(mousewheel, option.window_height);
 				console.log(dispather);
 				$('#container').bind(mousewheel, function(e){
 					var scroll_bar = $('#scroll_bar');
@@ -29,7 +29,6 @@
 					var wheel_delta =  e.originalEvent.wheelDelta;		
 					var y = speedToAxis(wheel_delta);
 					dispather.notify(y);
-
 				});	
 
 			});
