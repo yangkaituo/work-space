@@ -4,30 +4,57 @@
 		<meta charset="utf-8">
 		<link href="style.css" type="text/css" rel="stylesheet">
 		<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
-		<script src="scroll.js"></script>		
+		<script src="base.js"></script>	
+		<script>
+			$('document').ready(function() {
+				var obj = {
+					container: '#container', 
+					window_width: 0,
+					window_height: 0,
+					main_height: 0,
+					debug: true
+				};
+				
+				var option = new Base(obj);
+					console.log(option);	
+								
+				var mousewheel = option.isFirefox() ? "DOMMouseScroll" : "mousewheel";
+				
+				var speedToAxis = new option.SpeedToAxis({max: 20, min: 2});
+				var dispather = new Dispather();
+				console.log(dispather);
+				$('#container').bind(mousewheel, function(e){
+					var scroll_bar = $('#scroll_bar');
+
+					var wheel_delta =  e.originalEvent.wheelDelta;		
+					var y = speedToAxis(wheel_delta);
+					dispather.notify(y);
+
+				});	
+
+			});
+		</script>	
 	</head>
 	<body>
 		<div id="container">
 			<section id="main_frame">
 				<hgroup id="logo_frame"></hgroup>
-				<hgroup id="index" class="shadow">
+				<hgroup id="index" class="shadow" data-axis="0,1057">
 					<div class="slider shadow_inset"></div>
 					<div class="load">
 						<p class="remind"></p>
 					</div>
 				</hgroup>	
-				<hgroup id="start"></hgroup>
-				<hgroup id="intro"></hgroup>
+				<hgroup id="start" data-axis="1056,1482"></hgroup>
+				<hgroup id="intro" data-axis="1481,6482"></hgroup>
 				<!-- change background -->
-				<hgroup id="wiki">
-					
-				</hgroup>
-				<hgroup id="chat"></hgroup>
-				<hgroup id="social"></hgroup>
-				<hgroup id="share"></hgroup>
-				<hgroup id="shopping"></hgroup>
-				<hgroup id="radio"></hgroup>
-				<hgroup id="discover"></hgroup>
+				<hgroup id="wiki" data-axis="6481,9354"></hgroup>
+				<hgroup id="chat" data-axis="9353,11554"></hgroup>
+				<hgroup id="social" data-axis="11553,15153"></hgroup>
+				<hgroup id="share" data-axis="15153,17754"></hgroup>
+				<hgroup id="shopping" data-axis="17753,21354"></hgroup>
+				<hgroup id="radio" data-axis="21353,22754"></hgroup>
+				<hgroup id="discover" data-axis="22753,25654"></hgroup>
 			</section>
 			<div id="scroll_bar"></div>	
 		</div>		
