@@ -20,7 +20,7 @@
 								
 				var mousewheel = option.isFirefox() ? "DOMMouseScroll" : "mousewheel";
 				
-				var speedToAxis = new option.SpeedToAxis({max: 20, min: 2});
+				var speedToAxis = new option.SpeedToAxis({max: 100, min: 2});
 				var dispather = new Dispather(mousewheel, option.window_height);
 				console.log(dispather);
 				$('#container').bind(mousewheel, function(e){

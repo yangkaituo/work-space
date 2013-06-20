@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+<script src="slide.js"></script>
+<script>
+/*
+$('document').ready(function() {
+	$('#container').Slide({
+		control: '#control',
+		previous: 'previous',
+		next: 'next',
+		pagination: 'pagination'
+	});
+});
+*/
+</script>
+<style>
+.container {width:1000px; height:669px; margin: 0px auto; position:relative; overflow:hidden;}
+.control {position:relative;}
+</style>
+</head>
+<body>
+<div id="container" class="container">
+	<div id="control" class="control">
+		<img src="img/1.jpg" />
+		<img src="img/2.jpg" />
+		<img src="img/3.jpg" />
+		<img src="img/4.jpg" />
+	</div>
+	<a href="#" class="previous"></a>
+	<a href="#" class="next"></a>
+	<ul class="pagination">
+		<li></li>
+		<li></li>
+		<li></li>
+		<li></li>
+	</ul>
+</div>
+</body>
+</html>

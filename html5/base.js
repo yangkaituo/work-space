@@ -104,8 +104,8 @@ function Dispather(mousewheel, window_height) {
 				obj.id     = e.id;
 				obj.width  = e.clientWidth;
 				obj.height = e.clientHeight;
-				obj.show   = $('#'+e.id).data('axis').split(',')[0];
-				obj.hide   = $('#'+e.id).data('axis').split(',')[1];
+				obj.show   = parseInt($('#'+e.id).data('axis').split(',')[0]);
+				obj.hide   = parseInt($('#'+e.id).data('axis').split(',')[1]);
 				obj.bg     = '';
 				array.push(obj);
 			}
@@ -166,5 +166,5 @@ Dispather.prototype.scrollBar = function(y, main_height, element) {
 	//return move;
 
 	$('#scroll_bar').fadeIn().css({top: move});
-	element.scrollTop(move);
+	window.scrollBy(move);
 }

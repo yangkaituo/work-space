@@ -1,0 +1,55 @@
+<html>
+<head>
+<meta charset="utf-8">
+<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+<style>
+ul li {display:inline; float:left; line-height:20px;  margin:0px 4px 0px 4px; padding:1px; border: 1px solid #C8C9CD; }
+ul li span {display:block; padding:5px; font-size:12px; }
+.selected {border: 2px solid #FF6701;}
+</style>
+<script>
+$('document').ready(function() {
+	var radio = $('ul#radio');
+
+	radio.delegate("li", "click", function() {
+		var  radioName = $(this).attr("title");
+		radio.trigger("radio", radioName);
+	});
+	
+	radio.bind("radio", function (e, radioName) {
+		var target = radio.find("[title='"+radioName+"']");
+
+		if (target.hasClass("selected")) {
+			target.removeClass("selected");
+		}else{
+			radio.find("li").removeClass("selected");
+			target.addClass("selected");
+		}		
+	});
+	
+	$('.btn-submit').bind('click', function() {
+		var selected = radio.find('.selected');
+		var selectedValues = [];
+		if (selected && selected.length > 0) {
+			selected.each(function(i, e) {
+				selectedValues[i] = $(e).attr('title');
+			});
+		}
+		console.log(selectedValues);
+	});
+	
+	var e = document.getElementsByTagName('ul');
+	var box = e.offsetWidth;
+	console.log(box);
+});
+</script>
+</head>
+<body>
+<ul id="radio">
+	<li title="01"><span>浅灰色</span></li>
+	<li title="02"><span>浅粉色</span></li>
+	<li title="03"><span>浅蓝色</span></li>
+</ul>
+<input class="btn-submit" type="button" value="submit"/>
+</body>
+</html>
