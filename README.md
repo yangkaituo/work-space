@@ -1,7 +1,7 @@
 work-space
 ==========
 
-1、waterfall 暂停更新 请异步这里https://github.com/yangkaituo/jquery-waterfall-plugin
+1、waterfall 暂停更新 请移步这里https://github.com/yangkaituo/jquery-waterfall-plugin
 
 2、radio.html 用```html <ul><li><li>...</ul>```组合实现一个radio的效果。
    有没有想过radio tabs switchable 都有相似的地方，如果抽象出来。。。。有机会写写
@@ -13,3 +13,5 @@ work-space
 >> getBoundingClientRect() 返回的是视口坐标，如果要计算文档坐标还需要偏移量
 
 >> elementFromPoint() 方法是传递X和Y坐标，返回指定位置的元素
+
+5、whenReady.js 可以访问我这篇blog看看 http://eclipseongoing.diandian.com/post/2013-06-21/40050371132
