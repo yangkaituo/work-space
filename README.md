@@ -15,3 +15,6 @@ work-space
 >> elementFromPoint() 方法是传递X和Y坐标，返回指定位置的元素
 
 5、whenReady.js 可以访问我这篇blog看看 http://eclipseongoing.diandian.com/post/2013-06-21/40050371132
+
+> Node
+>> httpServer.js  一个简单的http服务器 支持：html htm js css txt 还可以模拟延迟响应
