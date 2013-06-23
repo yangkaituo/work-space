@@ -17,4 +17,4 @@ work-space
 5、whenReady.js 可以访问我这篇blog看看 http://eclipseongoing.diandian.com/post/2013-06-21/40050371132
 
 Node
-> httpServer.js  一个简单的http服务器 支持：html htm js css txt 还可以模拟延迟响应
+> httpServer.js  一个简单的node http服务器能处理当前目录文件 支持：html htm js css txt 还可以模拟延迟响应

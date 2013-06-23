@@ -1,3 +1,4 @@
+// 加载所需模块
 var http = require('http');
 var fs = require('fs');
 
@@ -6,9 +7,11 @@ server.listen(8000);
 
 server.on("request", function(request, response) {
 	var url = require('url').parse(request.url);
-	console.log(url.query);
 
+	//特殊url会让服务器在发送响应前先等待
+	//此处用来模拟缓慢的网络连接
 	if (url.pathname === "/test/delay") {
+		//使用?***的方式来获取延迟时长，或者使用默认值
 		var delay = parseInt(url.query) || 2000;
 
 		response.writeHead(200, {"Content-Type": "text/plain; charset=UTF-8"});
@@ -17,6 +20,7 @@ server.on("request", function(request, response) {
 			response.write("done.");
 			response.end();
 		}, delay);
+	//当需要看到这个请求头和主题的时候
 	}else if (url.pathname === "/test/mirror") {
 		response.writeHead(200, {"Content-Type": "text/plain; charset=UTF-8"});
 		response.write(request.method + " " + request.url + " HTTP/" + request.httpVersion + "\r\n");
@@ -49,7 +53,7 @@ server.on("request", function(request, response) {
 					"Content-Type": "text/plain; charset=UTF-8"
 				});
 				response.write(err.message);
-				response.write('file no found');
+				response.write('\r\n file no found');
 				response.end();
 			}else{
 				response.writeHead(200, {"Content-Type": type});
