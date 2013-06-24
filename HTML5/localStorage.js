@@ -10,7 +10,7 @@ var Nao = (function(){
 			}else{
 				value = value.toString();
 			}
-			console.log(typeof value);
+
 			return JSON.parse(value);
 		},
 		
