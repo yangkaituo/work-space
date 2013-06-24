@@ -18,3 +18,10 @@ work-space
 
 Node
 > httpServer.js  一个简单的node http服务器能处理当前目录文件 支持：html htm js css txt 还可以模拟延迟响应
+
+HTML5
+> localStorage.js  一个包装localStorage对象的简单类库
+>>  Nao.set('key', value) 设置localStorage;
+>>  Nao.get(key)          根据key值从localStorage里取值;
+>>  Nao.remove(key)       删除一项;
+>>  Nao.clear()           清空localStorage;
