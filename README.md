@@ -22,6 +22,9 @@ Node
 HTML5
 > localStorage.js  一个包装localStorage对象的简单类库
 >>  Nao.set('key', value) 设置localStorage;
+
 >>  Nao.get(key)          根据key值从localStorage里取值;
+
 >>  Nao.remove(key)       删除一项;
+
 >>  Nao.clear()           清空localStorage;
